@@ -76,6 +76,9 @@ class LoginController extends Controller
                         if(Auth::attempt(['email' => $this->request->input('email'), 'password' =>  $this->request->input('password')])) {
                             
                             $this->res['profile_id'] = \Auth::getUser()->group_id;
+                            $this->res['name'] = \Auth::getUser()->name;
+                            $this->res['email'] = \Auth::getUser()->email;
+                            $this->res['avatar'] = \Auth::getUser()->avatar;
 
                             $user = $this->request->user();
                             $tokenResult = $user->createToken('Personal Access Token');
@@ -89,7 +92,7 @@ class LoginController extends Controller
                             $this->res['expires_at'] = Carbon::parse($tokenResult->token->expires_at)->toDateTimeString();
                         } else {
                             $this->res['status_code'] = 401;
-                            $this->res['message'] = 'El correo electronico o la contraseña son incorrectos.';
+                            $this->res['message'] = 'El correo electrónico o la contraseña son incorrectos.';
                         }
                     } else {
                         $this->res['status_code'] = 422;
