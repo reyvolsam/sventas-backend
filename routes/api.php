@@ -19,5 +19,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::group(['prefix' => 'auth', 'middleware' => 'cors'], function (){
     Route::post('login', 'Auth\LoginController@auth');
+    Route::post('logout', 'Auth\LoginController@logout');
     Route::post('signup', 'UserController@store');
+});
+
+Route::group(['middleware' => ['cors', 'auth:api']], function (){    
+    Route::post('campus/lists', 'Catalogs\CampusController@lists');
+    Route::resource('campus', 'Catalogs\CampusController');
 });

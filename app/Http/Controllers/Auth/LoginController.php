@@ -115,8 +115,10 @@ class LoginController extends Controller
 
     public function logout()
     {
-        $request->user()->token()->revoke();
+        if($this->request->user()){
+            $this->request->user()->token()->revoke();
+        }
         return response()->json(['message' => 
-            'Cierre de sesión exitoso.']);
+        'Cierre de sesión exitoso.']);
     }//logout()
 }////
