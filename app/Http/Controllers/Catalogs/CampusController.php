@@ -34,10 +34,12 @@ class CampusController extends Controller
                 $this->res['message'] = 'Lista de Campus obtenida correctamente.';
                 $this->status_code = 200;
             } else {
+                $this->res['message'] = 'No hay Campus registrados hasta el momento.';
                 $this->status_code = 201;
             }
         } catch(\Exception $e){
             $this->res['msg'] = 'Error en el sistema.'.$e;
+            $this->status_code = 500;
         }
         return response()->json($this->res, $this->status_code);
     }//lists()
@@ -53,7 +55,7 @@ class CampusController extends Controller
             if(!$validator->fails()) {
                 $name = $this->request->input('name');
                 $campus_repeated = Campus::where('name', '=', $name)->count();
-                
+
                 if(count($campus_repeated) > 0){
 
                     $campus = new Campus;
@@ -73,7 +75,7 @@ class CampusController extends Controller
             $this->res['message'] = 'Error en el sistema.'.$e;
             $this->status_code = 422;
         }
-        
+
         return response()->json($this->res, $this->status_code);
     }//store()
 
@@ -93,7 +95,7 @@ class CampusController extends Controller
                     $this->status_code = 200;
                 } else {
                     $this->res['message'] = 'El campus no existe.';
-                    $this->status_code = 422;    
+                    $this->status_code = 422;
                 }
             } else {
                 $this->res['message'] = 'Por favor llene todos los campos requeridos o revise la longitud de los campos.';
@@ -103,7 +105,7 @@ class CampusController extends Controller
             $this->res['message'] = 'Error en el sistema.'.$e;
             $this->status_code = 422;
         }
-    
+
         return response()->json($this->res, $this->status_code);
     }//update()
 
@@ -119,12 +121,12 @@ class CampusController extends Controller
                     $this->status_code = 200;
                 } else {
                     $this->res['message'] = 'El campus no existe.';
-                    $this->status_code = 422;    
+                    $this->status_code = 422;
                 }
             } else {
                 $s = ($user_count > 0) ? ' usuario': ' usuarios';
                 $this->res['message'] = 'El campus esta asignado a '.$user_count.$s;
-                $this->status_code = 422;    
+                $this->status_code = 422;
             }
         } catch(\Exception $e) {
             $this->res['message'] = 'Error en el sistema.'.$e;

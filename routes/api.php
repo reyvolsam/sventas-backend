@@ -23,7 +23,7 @@ Route::group(['prefix' => 'auth', 'middleware' => 'cors'], function (){
     Route::post('signup', 'UserController@store');
 });
 
-Route::group(['middleware' => ['cors', 'auth:api']], function (){    
+Route::group(['middleware' => ['cors', 'auth:api']], function (){
     Route::post('campus/lists', 'Catalogs\CampusController@lists');
     Route::resource('campus', 'Catalogs\CampusController');
 });
