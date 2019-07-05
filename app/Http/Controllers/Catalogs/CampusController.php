@@ -46,7 +46,7 @@ class CampusController extends Controller
 
     public function store()
     {
-        try{
+        //try{
             $validator = Validator::make($this->request->all(), [
                 'name'              => 'required|max:100',
                 'description'       => 'max:255'
@@ -56,8 +56,7 @@ class CampusController extends Controller
                 $name = $this->request->input('name');
                 $campus_repeated = Campus::where('name', '=', $name)->count();
 
-                if(count($campus_repeated) > 0){
-
+                if($campus_repeated == 0){
                     $campus = new Campus;
                     $campus->create($this->request->all());
 
@@ -71,10 +70,10 @@ class CampusController extends Controller
                 $this->res['message'] = 'Por favor llene todos los campos requeridos o revise la longitud de los campos.';
                 $this->status_code = 422;
             }
-        } catch(\Exception $e) {
+        /*} catch(\Exception $e) {
             $this->res['message'] = 'Error en el sistema.'.$e;
             $this->status_code = 422;
-        }
+        }*/
 
         return response()->json($this->res, $this->status_code);
     }//store()
