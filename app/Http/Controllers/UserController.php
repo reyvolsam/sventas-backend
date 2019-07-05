@@ -12,13 +12,13 @@ class UserController extends Controller
 
     private $res = [];
     private $request;
-    private static $generic_password = "jQ0s5S3Mx1*";
+    private static $generic_password = "Nextio2019";
 
     function __construct(Request $request)
     {
         $this->request = $request;
         $this->res['message'] = '';
-        $this->res['status_code'] = 204;
+        $this->status_code = 204;
 
         date_default_timezone_set('America/Mexico_City');
     }//__construct()
@@ -30,7 +30,23 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        try{
+            $user_list = [];
+
+            $user_list = User::all();
+
+            if(count($user_list) > 0){
+                $this->res['data'] = $user_list;
+            } else {
+                $this->res['message'] = 'No hay usuarios hasta el momento.';
+            }
+
+            $this->status_code = 200;
+        } catch(\Exception $e) {
+            $this->res['message'] = 'Error en la Base de Datos.'.$e;
+            $this->status_code = 500;
+        }
+        return response()->json($this->res, $this->status_code);
     }
 
     /**
@@ -51,87 +67,72 @@ class UserController extends Controller
      */
     public function store()
     {
-        $validator = Validator::make($this->request->all(), [
-            'name'              => 'required|max:255',
-            'email'             => 'required|max:255|email',
-            'group_id'          => 'required'
-        ]);
-
-        $id                     = $this->request->input('id');
-        $data['name']           = $this->request->input('name');
-        $data['email']          = $this->request->input('email');
-        $data['group_id']       = $this->request->input('group_id');
-        $data['active']         = $this->request->input('active');
-
         try{
+            $validator = Validator::make($this->request->all(), [
+                'name'              => 'required|max:255',
+                'email'             => 'required|max:255|email',
+                'campus_id'         => 'required',
+                'group_id'          => 'required'
+            ]);
+
+            $id                     = $this->request->input('id');
+            $data['name']           = $this->request->input('name');
+            $data['email']          = $this->request->input('email');
+            $data['campus_id']      = $this->request->input('campus_id');
+            $data['group_id']       = $this->request->input('group_id');
+            $data['active']         = $this->request->input('active');
+
             if(!$validator->fails()) {
-                if($id == null){
+                $user = User::where('email', '=', $data['email'])->get();
 
-                    $user = User::where('email', '=', $data['email'])->get();
-
-                    if(count($user) == 0){
+                if(count($user) == 0){
+                    $user = User::withTrashed()
+                                    ->where('email', '=',$data['email'])
+                                    ->get();
+                    if( count($user) > 0 ){
                         $user = User::withTrashed()
-                                        ->where('email', '=',$data['email'])
-                                        ->get();
-                        if( count($user) > 0 ){
-                            $user = User::withTrashed()
-                                        ->where('email', '=', $data['email'])
-                                        ->restore();
+                                    ->where('email', '=', $data['email'])
+                                    ->restore();
 
-                            $user = User::where('email', '=', $data['email'])->first();
+                        //$user = User::where('email', '=', $data['email'])->first();
 
-                            $user->password         = bcrypt(self::$generic_password);
-                            
-                            $user->avatar           = 'avatar.png';
-                            $user->group_id         = $data['group_id'];
-                            $user->active           = $data['active'];
-                            $user->save();
+                        $user->password         = bcrypt(self::$generic_password);
 
-                            $this->res['client'] = $user;
-                            $this->res['message'] = 'Usuario restaurado correctamente.';
-                            $this->res['status_code'] = 201;
-                        } else {
-                            $user = new User;
-                            $user->name       = $data['name'];
-                            $user->email            = $data['email'];
-                            $user->password         = bcrypt(self::$generic_password);    
-                            $user->avatar           = 'avatar.png';
-                            $user->group_id         = $data['group_id'];
-                            $user->active           = $data['active'];
-                            $user->save();
+                        $user->avatar           = 'avatar.png';
+                        $user->campus_id        = $data['campus_id'];
+                        $user->group_id         = $data['group_id'];
+                        $user->active           = $data['active'];
+                        $user->save();
 
-                            $this->res['client'] = $user;
-                            $this->res['message'] = 'Usuario creado correctamente.';
-                            $this->res['status_code'] = 201;
-                        }
+                        $this->res['message'] = 'Usuario restaurado correctamente.';
+                        $this->status_code = 201;
                     } else {
-                        $this->res['msg'] = 'El usuario ya existe.';
-                        $this->res['status_code'] = 423;
+                        $user = new User;
+                        $user->name             = $data['name'];
+                        $user->email            = $data['email'];
+                        $user->password         = bcrypt(self::$generic_password);
+                        $user->avatar           = 'avatar.png';
+                        $user->campus_id        = $data['campus_id'];
+                        $user->group_id         = $data['group_id'];
+                        $user->active           = $data['active'];
+                        $user->save();
+
+                        $this->res['message'] = 'Usuario creado correctamente.';
+                        $this->status_code = 201;
                     }
                 } else {
-                    $user = User::find($id);
-
-                    $user->first_name       = $data['first_name'];
-                    $user->last_name        = $data['last_name'];
-                    $user->email            = $data['email'];
-                    $user->phone            = $data['phone'];
-                    $user->active           = $data['active'];
-                    $user->group_id         = $data['group_id'];                    
-                    $user->save();
-
-                    $this->res['client'] = $user;
-                    $this->res['message'] = 'Usuario actualizado correctamente.';
-                    $this->res['status_code'] = 201;          
+                    $this->res['message'] = 'El correo electrónico ya existe.';
+                    $this->status_code = 423;
                 }
             } else {
-                $this->res['msg'] = 'Por favor llene todos los campos requeridos.';
-                $this->res['status_code'] = 422;
+                $this->res['message'] = 'Por favor llene todos los campos requeridos.';
+                $this->status_code = 422;
             }
         } catch(\Exception $e) {
-            $this->res['msg'] = 'Error en la Base de Datos.'.$e;
-            $this->res['status_code'] = 500;
+            $this->res['message'] = 'Error en la Base de Datos.'.$e;
+            $this->status_code = 500;
         }
-        return response()->json($this->res, $this->res['status_code']);
+        return response()->json($this->res, $this->status_code);
     }//store
 
     /**
@@ -163,7 +164,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(, $id)
     {
         //
     }
