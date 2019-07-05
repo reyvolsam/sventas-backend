@@ -27,10 +27,11 @@ class CampusController extends Controller
     public function lists()
     {
         try{
-            $campus = Campus::all();
+            $campus = Campus::select('id', 'name', 'description')->get();
 
             $this->res['data'] = $campus;
             if(count($campus) > 0){
+                foreach ($campus as $kc => $vc) $vc->loader = false;
                 $this->res['message'] = 'Lista de Campus obtenida correctamente.';
                 $this->status_code = 200;
             } else {
@@ -125,7 +126,7 @@ class CampusController extends Controller
                 }
             } else {
                 $s = ($user_count > 0) ? ' usuario': ' usuarios';
-                $this->res['message'] = 'El campus esta asignado a '.$user_count.$s;
+                $this->res['message'] = 'El Campus esta asignado a '.$user_count.$s;
                 $this->status_code = 422;
             }
         } catch(\Exception $e) {
