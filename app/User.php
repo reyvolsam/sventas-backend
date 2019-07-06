@@ -29,4 +29,14 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
-}
+
+    public function Campus()
+    {
+        return $this->belongsTo('App\Campus');
+    }//Campus()
+
+    public function Group()
+    {
+        return $this->belongsTo('App\Group');
+    }//Campus()
+}////

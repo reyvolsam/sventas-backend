@@ -33,9 +33,12 @@ class UserController extends Controller
         try{
             $user_list = [];
 
-            $user_list = User::all();
+            $user_list = User::with('Campus', 'Group')->jsonPaginate();
 
             if(count($user_list) > 0){
+
+                foreach ($user_list as $kul => $vul) $vul->loader = false;
+
                 $this->res['data'] = $user_list;
             } else {
                 $this->res['message'] = 'No hay usuarios hasta el momento.';
@@ -90,11 +93,9 @@ class UserController extends Controller
                                     ->where('email', '=',$data['email'])
                                     ->get();
                     if( count($user) > 0 ){
-                        $user = User::withTrashed()
-                                    ->where('email', '=', $data['email'])
-                                    ->restore();
+                        User::withTrashed()->where('email', '=', $data['email'])->restore();
 
-                        //$user = User::where('email', '=', $data['email'])->first();
+                        $user = User::where('email', '=', $data['email'])->first();
 
                         $user->password         = bcrypt(self::$generic_password);
 
@@ -164,9 +165,59 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(, $id)
+    public function update($id)
     {
-        //
+        try{
+            if(is_numeric($id)){
+                $validator = Validator::make($this->request->all(), [
+                    'name'              => 'required|max:255',
+                    'email'             => 'required|max:255|email',
+                    'campus_id'         => 'required',
+                    'group_id'          => 'required'
+                ]);
+
+                $data['name']           = $this->request->input('name');
+                $data['email']          = $this->request->input('email');
+                $data['campus_id']      = $this->request->input('campus_id');
+                $data['group_id']       = $this->request->input('group_id');
+                $data['active']         = $this->request->input('active');
+
+                if(!$validator->fails()) {
+                    $user_exist = User::where('email', '=', $data['email'])->where('id', '!=', $id)->count();
+
+                    if($user_exist == 0){
+                        $user = User::find($id);
+                        if($user){
+                            $user->name             = $data['name'];
+                            $user->email            = $data['email'];
+                            $user->campus_id        = $data['campus_id'];
+                            $user->group_id         = $data['group_id'];
+                            $user->active           = $data['active'];
+                            $user->save();
+
+                            $this->res['message'] = 'Usuario actualizado correctamente.';
+                            $this->status_code = 201;
+                        } else {
+                            $this->res['message'] = 'El usuario no existe.';
+                            $this->status_code = 422;
+                        }
+                    } else {
+                        $this->res['message'] = 'El correo electrónico ya existe.';
+                        $this->status_code = 423;
+                    }
+                } else {
+                    $this->res['message'] = 'Por favor llene todos los campos requeridos.';
+                    $this->status_code = 422;
+                }
+            } else {
+                $this->res['message'] = 'ID incorrecto.';
+                $this->status_code = 422;
+            }
+        } catch(\Exception $e) {
+            $this->res['message'] = 'Error en la Base de Datos.'.$e;
+            $this->status_code = 500;
+        }
+        return response()->json($this->res, $this->status_code);
     }
 
     /**
@@ -177,6 +228,25 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try{
+            if(is_numeric($id)){
+                $user = User::find($id);
+                if($user){
+                    $user->delete();
+                    $this->res['message'] = 'Usuario eliminado correctamente.';
+                    $this->status_code = 201;
+                } else {
+                    $this->res['message'] = 'El usuario no existe.';
+                    $this->status_code = 422;
+                }
+            } else {
+                $this->res['message'] = 'ID incorrecto.';
+                $this->status_code = 422;
+            }
+        } catch(\Exception $e) {
+            $this->res['message'] = 'Error en la Base de Datos.'.$e;
+            $this->status_code = 500;
+        }
+        return response()->json($this->res, $this->status_code);
     }
 }
