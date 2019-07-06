@@ -33,7 +33,7 @@ class UserController extends Controller
         try{
             $user_list = [];
 
-            $user_list = User::with('Campus', 'Group')->jsonPaginate();
+            $user_list = User::with('Campus', 'Group')->select('id', 'name', 'email', 'group_id', 'campus_id')->jsonPaginate();
 
             if(count($user_list) > 0){
 
