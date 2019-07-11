@@ -28,9 +28,10 @@ CREATE TABLE `campus` (
   `description` varchar(255) CHARACTER SET ucs2 COLLATE ucs2_spanish2_ci DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,6 +40,7 @@ CREATE TABLE `campus` (
 
 LOCK TABLES `campus` WRITE;
 /*!40000 ALTER TABLE `campus` DISABLE KEYS */;
+INSERT INTO `campus` VALUES (3,'Campus 1','-','2019-07-11 12:49:06','2019-07-11 12:49:06',NULL),(4,'Campus 2','-','2019-07-11 13:03:32','2019-07-11 13:03:32',NULL),(5,'Campus 3','-','2019-07-11 13:03:36','2019-07-11 13:03:36',NULL),(6,'Campus 4','-','2019-07-11 13:03:39','2019-07-11 13:03:39',NULL),(7,'Campus 5','-','2019-07-11 13:03:44','2019-07-11 13:03:44',NULL);
 /*!40000 ALTER TABLE `campus` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -56,11 +58,12 @@ CREATE TABLE `grades` (
   `campus_id` int(10) unsigned NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_campus_id_idx` (`campus_id`),
   CONSTRAINT `fk_grades_campus_id` FOREIGN KEY (`campus_id`) REFERENCES `campus` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,7 +72,7 @@ CREATE TABLE `grades` (
 
 LOCK TABLES `grades` WRITE;
 /*!40000 ALTER TABLE `grades` DISABLE KEYS */;
-INSERT INTO `grades` VALUES (1,'Usuario 20','-',0,'2019-07-10 17:26:19','2019-07-10 17:26:19');
+INSERT INTO `grades` VALUES (2,'1er Grado','-',3,'2019-07-11 13:08:45','2019-07-11 13:58:43',NULL),(3,'2o Grado','-',3,'2019-07-11 13:09:08','2019-07-11 13:09:08',NULL),(4,'3er Grado','-',3,'2019-07-11 13:09:14','2019-07-11 13:09:14',NULL),(5,'4o Grado','-',3,'2019-07-11 13:09:21','2019-07-11 13:09:21',NULL),(6,'5o Grado','-',3,'2019-07-11 13:09:26','2019-07-11 13:09:26',NULL),(7,'6o Grado','-',3,'2019-07-11 13:09:29','2019-07-11 13:09:29',NULL),(8,'7o Grado','-',3,'2019-07-11 13:09:46','2019-07-11 13:37:10',NULL),(9,'8o Grados','--/',3,'2019-07-11 13:13:00','2019-07-11 13:44:37','2019-07-11 13:44:37');
 /*!40000 ALTER TABLE `grades` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -310,11 +313,12 @@ CREATE TABLE `school_groups` (
   `grade_id` int(10) unsigned NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_grade_id_idx` (`grade_id`),
   CONSTRAINT `fk_grade_id` FOREIGN KEY (`grade_id`) REFERENCES `grades` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -323,7 +327,37 @@ CREATE TABLE `school_groups` (
 
 LOCK TABLES `school_groups` WRITE;
 /*!40000 ALTER TABLE `school_groups` DISABLE KEYS */;
+INSERT INTO `school_groups` VALUES (1,'Grupo AA','N/A',2,NULL,'2019-07-11 14:28:23',NULL),(2,'Grupo A','-',3,'2019-07-11 14:20:49','2019-07-11 14:20:49',NULL),(3,'Grupo B',NULL,3,'2019-07-11 14:21:26','2019-07-11 14:21:26',NULL);
 /*!40000 ALTER TABLE `school_groups` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `students`
+--
+
+DROP TABLE IF EXISTS `students`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `students` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `enrollment` varchar(255) COLLATE utf8_spanish2_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_spanish2_ci NOT NULL,
+  `grade_id` int(10) unsigned NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `students`
+--
+
+LOCK TABLES `students` WRITE;
+/*!40000 ALTER TABLE `students` DISABLE KEYS */;
+/*!40000 ALTER TABLE `students` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -374,4 +408,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-07-10 17:59:08
+-- Dump completed on 2019-07-11 17:55:56

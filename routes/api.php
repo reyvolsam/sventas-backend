@@ -29,4 +29,8 @@ Route::group(['middleware' => ['cors', 'auth:api']], function (){
     Route::resource('user', 'UserController');
 
     Route::resource('grade', 'Catalogs\GradeController');
+
+    Route::resource('group', 'Catalogs\GroupController');
+
+    Route::resource('student', 'StudentController');
 });

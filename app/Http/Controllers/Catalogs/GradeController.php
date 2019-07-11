@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Validator;
 
+use App\SchoolGroup;
 use App\Grade;
 
 class GradeController extends Controller
@@ -22,7 +23,6 @@ class GradeController extends Controller
         date_default_timezone_set('America/Mexico_City');
     }//__construct()
 
-
     /**
      * Display a listing of the resource.
      *
@@ -31,7 +31,7 @@ class GradeController extends Controller
     public function index()
     {
         try{
-            $grades_list = Grade::select('id', 'name', 'description', 'campus_id')->get();
+            $grades_list = Grade::with('campus')->select('id', 'name', 'description', 'campus_id')->get();
 
             $this->res['data'] = $grades_list;
             if(count($grades_list) > 0){
@@ -69,13 +69,14 @@ class GradeController extends Controller
         try{
             $validator = Validator::make($this->request->all(), [
                 'name'              => 'required|max:10',
+                'campus_id'         => 'required',
                 'description'       => 'max:255'
             ]);
 
             if(!$validator->fails()) {
                 $name = $this->request->input('name');
 
-                $grade_repeated = User::where('name', $name)->count();
+                $grade_repeated = Grade::where('name', $name)->count();
                 if($grade_repeated == 0){                    
                     $grade_trash = Grade::withTrashed()->where('name', $name)->count();
 
@@ -88,9 +89,9 @@ class GradeController extends Controller
                     } else {
                         Grade::withTrashed()->where('name', $name)->restore();
 
-                        $grade = User::where('name', $name)->first();
+                        $grade = Grade::where('name', $name)->first();
 
-                        $grade->updateOrCreate([$grade->id], $this->request->all());
+                        $grade->updateOrCreate(['id' => $grade->id], $this->request->all());
 
                         $this->res['message'] = 'Grado restaurado correctamente.';
                         $this->status_code = 422;
@@ -140,26 +141,32 @@ class GradeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update($id)
     {
         try{
-            $validator = Validator::make($this->request->all(), [
-                'name'              => 'required|max:10',
-                'description'       => 'max:255'
-            ]);
+            if(is_numeric($id)){
+                $validator = Validator::make($this->request->all(), [
+                    'name'              => 'required|max:10',
+                    'campus_id'         => 'required',
+                    'description'       => 'max:255'
+                ]);
 
-            if(!$validator->fails()) {
-                $grade_exist = Grade::find($id);
-                if($grade_exist){
-                    Grade::updateOrCreate(['id' => $id], $this->request->all());
-                    $this->res['message'] = 'Grado actualizado correctamente.';
-                    $this->status_code = 200;
+                if(!$validator->fails()) {
+                    $grade_exist = Grade::find($id);
+                    if($grade_exist){
+                        Grade::updateOrCreate(['id' => $id], $this->request->all());
+                        $this->res['message'] = 'Grado actualizado correctamente.';
+                        $this->status_code = 200;
+                    } else {
+                        $this->res['message'] = 'El Grado no existe.';
+                        $this->status_code = 422;
+                    }
                 } else {
-                    $this->res['message'] = 'El Grado no existe.';
+                    $this->res['message'] = 'Por favor llene todos los campos requeridos o revise la longitud de los campos.';
                     $this->status_code = 422;
                 }
             } else {
-                $this->res['message'] = 'Por favor llene todos los campos requeridos o revise la longitud de los campos.';
+                $this->res['message'] = 'ID incorrecto.';
                 $this->status_code = 422;
             }
         } catch(\Exception $e) {
@@ -179,14 +186,20 @@ class GradeController extends Controller
     public function destroy($id)
     {
         try{
-            if(is_numeric($id)){    
-                $grade = Grade::find($id);
-                if($grade){
-                    $grade->delete();
-                    $this->res['message'] = 'Grado eliminado correctamente.';
-                    $this->status_code = 200;
+            if(is_numeric($id)){
+                $exist_school_group = SchoolGroup::where('grade_id', $id)->count();
+                if($exist_school_group == 0){
+                    $grade = Grade::find($id);
+                    if($grade){
+                        $grade->delete();
+                        $this->res['message'] = 'Grado eliminado correctamente.';
+                        $this->status_code = 200;
+                    } else {
+                        $this->res['message'] = 'El grado no existe.';
+                        $this->status_code = 422;
+                    }
                 } else {
-                    $this->res['message'] = 'El grado no existe.';
+                    $this->res['message'] = 'Hay un grupo usando este grado.';
                     $this->status_code = 422;
                 }
             } else {

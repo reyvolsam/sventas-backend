@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Campus extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'campus';
     protected $fillable = ['name', 'description'];
 	protected $guarded = ['id'];

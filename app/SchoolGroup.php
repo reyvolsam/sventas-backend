@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SchoolGroup extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['name', 'description', 'grade_id'];
     protected $guarded = ['id'];
     protected $dates = ['deleted_at'];
