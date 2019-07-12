@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Validator;
 
 use App\Student;
+use App\ParentStudent;
 
 class StudentController extends Controller
 {
@@ -63,9 +64,49 @@ class StudentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store()
     {
-        //
+        try{
+            $validator = Validator::make($this->request->all(), [
+                'enrollment'            => 'required|max:255',
+                'name'                  => 'required|max:255',
+                'grade_id'              => 'required'
+            ]);
+
+            if(!$validator->fails()) {
+                $name = $this->request->input('name');
+                $enrollment = $this->request->input('enrollment');
+                $student_repeated = Student::where('name', '=', $name)->where('enrollment', $enrollment)->count();
+
+                if($student_repeated == 0){
+                    $student = new Student;
+                    $id = $student->create($this->request->all())->id;
+
+                    $parents_stdents = $this->request->input('parents_students');
+
+                    if(count($parents_stdents) > 0){
+                        foreach ($parents_stdents as $kps => $vps) {
+                            $parent_student = new ParentStudent;
+                            $student->create($vps);
+                        }
+                    }
+
+                    $this->res['message'] = 'Estudiante creado correctamente.';
+                    $this->status_code = 200;
+                } else {
+                    $this->res['message'] = 'El nombre del estudiante con la matricula ya existe.';
+                    $this->status_code = 422;
+                }
+            } else {
+                $this->res['message'] = 'Por favor llene todos los campos requeridos o revise la longitud de los campos.';
+                $this->status_code = 422;
+            }
+        } catch(\Exception $e) {
+            $this->res['message'] = 'Error en el sistema.'.$e;
+            $this->status_code = 422;
+        }
+
+        return response()->json($this->res, $this->status_code);
     }
 
     /**

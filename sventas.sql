@@ -276,6 +276,68 @@ LOCK TABLES `oauth_refresh_tokens` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `parent_types`
+--
+
+DROP TABLE IF EXISTS `parent_types`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `parent_types` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_spanish2_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `parent_types`
+--
+
+LOCK TABLES `parent_types` WRITE;
+/*!40000 ALTER TABLE `parent_types` DISABLE KEYS */;
+INSERT INTO `parent_types` VALUES (1,'Padre','2019-07-12 12:00:00',NULL),(2,'Madre','2019-07-12 12:00:00',NULL),(3,'Tutor','2019-07-12 12:00:00',NULL);
+/*!40000 ALTER TABLE `parent_types` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `parents_students`
+--
+
+DROP TABLE IF EXISTS `parents_students`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `parents_students` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `student_id` int(10) unsigned NOT NULL,
+  `name` varchar(255) COLLATE utf8_spanish2_ci NOT NULL,
+  `parent_type_id` int(11) unsigned NOT NULL,
+  `phone` varchar(20) COLLATE utf8_spanish2_ci DEFAULT NULL,
+  `address` varchar(255) COLLATE utf8_spanish2_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `fk_parents_students_parent_type_idx` (`parent_type_id`),
+  KEY `fk_parents_students_student_id_idx` (`student_id`),
+  CONSTRAINT `fk_parents_students_parent_type` FOREIGN KEY (`parent_type_id`) REFERENCES `parent_types` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_parents_students_student_id` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `parents_students`
+--
+
+LOCK TABLES `parents_students` WRITE;
+/*!40000 ALTER TABLE `parents_students` DISABLE KEYS */;
+/*!40000 ALTER TABLE `parents_students` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `password_resets`
 --
 
@@ -348,7 +410,7 @@ CREATE TABLE `students` (
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_spanish2_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -357,6 +419,7 @@ CREATE TABLE `students` (
 
 LOCK TABLES `students` WRITE;
 /*!40000 ALTER TABLE `students` DISABLE KEYS */;
+INSERT INTO `students` VALUES (1,'123456-A','Estudiante 1',1,'2019-07-12 13:09:59','2019-07-12 13:09:59',NULL),(2,'123456-AS','Estudiante 2',1,'2019-07-12 13:15:01','2019-07-12 13:15:01',NULL),(3,'123456-AS','Estudiante 3',1,'2019-07-12 13:27:42','2019-07-12 13:27:42',NULL),(4,'123456-ASA','Estudiante 4',1,'2019-07-12 13:28:13','2019-07-12 13:28:13',NULL);
 /*!40000 ALTER TABLE `students` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -386,7 +449,7 @@ CREATE TABLE `users` (
   KEY `fk_campus_id_idx` (`campus_id`),
   CONSTRAINT `fk_campus_id` FOREIGN KEY (`campus_id`) REFERENCES `campus` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf32 COLLATE=utf32_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf32 COLLATE=utf32_spanish2_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -395,7 +458,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Samuel Regino Placido','samuel43_7@hotmail.com','$2y$10$0Au256pSaAs1mdFqiefRCeyBD4uKqldyRFfsbOHOElfptDYky0JUK',NULL,1,'avatar.png',1,0,'2019-05-29 22:04:02','2019-05-29 22:04:02',NULL);
+INSERT INTO `users` VALUES (1,'Samuel Regino Placido','samuel43_7@hotmail.com','$2y$10$0Au256pSaAs1mdFqiefRCeyBD4uKqldyRFfsbOHOElfptDYky0JUK',NULL,1,'avatar.png',1,3,'2019-05-29 22:04:02','2019-05-29 22:04:02',NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -408,4 +471,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-07-11 17:55:56
+-- Dump completed on 2019-07-12 17:50:51
