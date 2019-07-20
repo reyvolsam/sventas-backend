@@ -86,8 +86,9 @@ class StudentController extends Controller
 
                     if(count($parents_stdents) > 0){
                         foreach ($parents_stdents as $kps => $vps) {
+                            $vps['student_id'] = $id;
                             $parent_student = new ParentStudent;
-                            $student->create($vps);
+                            $parent_student->create($vps);
                         }
                     }
 
@@ -138,9 +139,59 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update($id)
     {
-        //
+        try{
+            if(is_numeric($id)){
+                $student = Student::find($id);
+                if($student){
+                    $validator = Validator::make($this->request->all(), [
+                        'enrollment'            => 'required|max:255',
+                        'name'                  => 'required|max:255',
+                        'grade_id'              => 'required'
+                    ]);
+        
+                    if(!$validator->fails()) {
+                        $name = $this->request->input('name');
+                        $enrollment = $this->request->input('enrollment');
+                        $student_repeated = Student::where('name', '=', $name)
+                                                        ->where('enrollment', $enrollment)
+                                                        ->where('id', '!=', $id)
+                                                        ->count();
+                        if($student_repeated == 0){
+                            $id = Student::updateOrCreate(['id' => $id], $this->request->all())->id;
+        
+                            $parents_stdents = $this->request->input('parents_students');
+        
+                            if(count($parents_stdents) > 0){
+                                foreach ($parents_stdents as $kps => $vps) {
+                                    ParentStudent::updateOrCreate(['id' => $vps['id']], $vps);
+                                }
+                            }
+        
+                            $this->res['message'] = 'Estudiante actualizado correctamente.';
+                            $this->status_code = 200;
+                        } else {
+                            $this->res['message'] = 'El nombre del estudiante con la matricula ya existe.';
+                            $this->status_code = 422;
+                        }
+                    } else {
+                        $this->res['message'] = 'Por favor llene todos los campos requeridos o revise la longitud de los campos.';
+                        $this->status_code = 422;
+                    }
+                } else {
+                    $this->res['message'] = 'El estudiante no existe.';
+                    $this->status_code = 422;
+                }
+            } else {
+                $this->res['message'] = 'ID incorrecto.';
+                $this->status_code = 422;
+            }
+        } catch(\Exception $e) {
+            $this->res['message'] = 'Error en la Base de Datos.'.$e;
+            $this->status_code = 500;
+        }
+        return response()->json($this->res, $this->status_code);
     }
 
     /**
@@ -151,6 +202,27 @@ class StudentController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try{
+            if(is_numeric($id)){
+                $student = Student::find($id);
+                if($student){
+                    $parent_student = ParentStudent::where('student_id', $id)->delete();                    
+                    $student->delete();
+
+                    $this->res['message'] = 'Estudiante eliminado correctamente.';
+                    $this->status_code = 201;
+                } else {
+                    $this->res['message'] = 'El estudiante no existe.';
+                    $this->status_code = 422;
+                }
+            } else {
+                $this->res['message'] = 'ID incorrecto.';
+                $this->status_code = 422;
+            }
+        } catch(\Exception $e) {
+            $this->res['message'] = 'Error en la sistema.'.$e;
+            $this->status_code = 500;
+        }
+        return response()->json($this->res, $this->status_code);
     }
 }
