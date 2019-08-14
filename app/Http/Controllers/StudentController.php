@@ -30,7 +30,7 @@ class StudentController extends Controller
     public function index()
     {
         try{
-            $students_list = Student::with('grade')->select('id', 'enrollment', 'name', 'grade_id')->get();
+            $students_list = Student::with('Grade', 'SchoolGroup')->select('id', 'enrollment', 'name', 'grade_id')->get();
 
             $this->res['data'] = $students_list;
             if(count($students_list) > 0){
@@ -70,7 +70,8 @@ class StudentController extends Controller
             $validator = Validator::make($this->request->all(), [
                 'enrollment'            => 'required|max:255',
                 'name'                  => 'required|max:255',
-                'grade_id'              => 'required'
+                'grade_id'              => 'required',
+                'school_group_id'       => 'required'
             ]);
 
             if(!$validator->fails()) {
@@ -148,7 +149,8 @@ class StudentController extends Controller
                     $validator = Validator::make($this->request->all(), [
                         'enrollment'            => 'required|max:255',
                         'name'                  => 'required|max:255',
-                        'grade_id'              => 'required'
+                        'grade_id'              => 'required',
+                        'school_group_id'       => 'required'
                     ]);
         
                     if(!$validator->fails()) {
